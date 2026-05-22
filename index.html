@@ -2,7 +2,10 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A1612">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Lavih Spa — Gestão de Atendimentos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -776,32 +779,294 @@
   }
 
   /* ============ MOBILE ============ */
+  /* ============ TABLET ============ */
   @media (max-width: 1100px) {
     .kpi-grid { grid-template-columns: repeat(2, 1fr); }
     .chart-grid { grid-template-columns: 1fr; }
+    .main { padding: 32px 32px 80px; }
   }
+
+  /* ============ MOBILE ============ */
   @media (max-width: 768px) {
+    /* Sidebar como drawer com backdrop */
     .sidebar {
-      position: fixed; width: 220px;
+      position: fixed; left: 0; top: 0;
+      width: 260px; height: 100vh;
       transform: translateX(-100%);
       transition: transform .3s ease;
       z-index: 100;
+      padding: 24px 22px;
     }
     .sidebar.open { transform: translateX(0); }
-    .main { max-width: 100vw; padding: 24px 20px 80px; }
-    .page-head { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .page-title { font-size: 32px; }
-    .form-grid { grid-template-columns: 1fr; }
+    .sidebar-backdrop {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(26,22,18,0.5);
+      backdrop-filter: blur(2px);
+      z-index: 99;
+    }
+    .sidebar-backdrop.show { display: block; animation: bannerIn .2s ease; }
+
+    /* Top bar mobile */
     .menu-toggle {
-      display: flex; position: fixed; top: 16px; left: 16px;
-      width: 40px; height: 40px;
+      display: flex !important;
+      position: fixed; top: 14px; left: 14px;
+      width: 44px; height: 44px;
       background: var(--bg-deep); color: var(--gold-soft);
       border-radius: 4px;
       align-items: center; justify-content: center;
-      z-index: 50; cursor: pointer; border: none;
+      cursor: pointer; border: none;
+      z-index: 90;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
-    .kpi-grid { grid-template-columns: 1fr; }
+
+    /* Main padding tighter (com espaço pro menu-toggle) */
+    .main {
+      max-width: 100vw;
+      padding: 70px 16px 60px;
+    }
+
+    /* Headers more compact */
+    .page-head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 22px;
+      padding-bottom: 18px;
+    }
+    .page-title { font-size: 30px; line-height: 1.1; }
+    .page-sub { font-size: 12px; }
+    .page-date { text-align: left; }
+    .page-date strong { font-size: 18px; }
+
+    /* KPI stack with bigger touch targets */
+    .kpi-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .kpi { padding: 18px 16px; }
+    .kpi-value { font-size: 30px; }
+    .kpi-value .currency { font-size: 14px; top: 4px; }
+    .kpi-label { font-size: 9px; }
+    .kpi-foot { font-size: 11px; margin-top: 10px; }
+
+    /* Period bar mobile — chips scrolláveis */
+    .period-bar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+      padding: 12px;
+      margin-bottom: 20px;
+    }
+    .period-chips {
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 4px;
+    }
+    .period-chips::-webkit-scrollbar { display: none; }
+    .period-chip {
+      padding: 10px 16px;
+      font-size: 11px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .period-range {
+      flex-direction: column;
+      gap: 10px;
+      align-items: stretch;
+    }
+    .range-field { min-width: 0; }
+
+    /* Section padding */
+    .section { padding: 20px 16px; }
+    .section-head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .section-title { font-size: 20px; }
+
+    /* Form mobile */
+    .form-grid { grid-template-columns: 1fr; gap: 16px; }
+    .form-input, .form-select, .form-textarea {
+      font-size: 16px; /* evita zoom no iOS */
+      padding: 12px 0;
+    }
+    .service-picker { max-height: 320px; padding: 8px; }
+    .service-row {
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      padding: 12px 10px;
+    }
+    .service-row .check {
+      grid-row: 1 / 3;
+      grid-column: 2;
+      align-self: center;
+      width: 22px; height: 22px;
+    }
+    .service-row .name { font-size: 14px; line-height: 1.3; }
+    .service-row .price {
+      font-size: 14px;
+      grid-column: 1;
+    }
+    .selected-summary { padding: 14px 14px; }
+    .summary-line { font-size: 13px; }
+    .summary-line.total { font-size: 16px; }
+
+    /* TABLES → CARDS */
+    .section .table {
+      display: block;
+    }
+    .section .table thead {
+      display: none; /* esconder headers em mobile */
+    }
+    .section .table tbody {
+      display: block;
+    }
+    .section .table tr {
+      display: block;
+      background: var(--bg-warm);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 14px;
+      margin-bottom: 10px;
+      border-left: 2px solid var(--gold-soft);
+    }
+    .section .table tr:hover td { background: transparent; }
+    .section .table td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 6px 0;
+      border-bottom: 1px dashed var(--line);
+      font-size: 13px;
+      max-width: 100% !important;
+      white-space: normal !important;
+    }
+    .section .table td:last-child { border-bottom: none; }
+    .section .table td::before {
+      content: attr(data-label);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    /* Empty state in mobile table */
+    .section .table tr:has(.empty-state) {
+      background: transparent;
+      border: 1px dashed var(--line);
+      border-left: 1px dashed var(--line);
+      padding: 0;
+    }
+    .section .table tr:has(.empty-state) td {
+      border: none;
+      padding: 0;
+    }
+    .section .table tr:has(.empty-state) td::before { display: none; }
+    /* Action buttons row */
+    .section .table td.actions {
+      justify-content: flex-end;
+      padding-top: 10px;
+      border-bottom: none;
+    }
+    .section .table td.actions::before { display: none; }
+    .btn-icon {
+      padding: 10px;
+      min-width: 40px;
+      min-height: 40px;
+    }
+    .btn-icon svg { width: 18px; height: 18px; }
+
+    /* Filters bar */
+    .filters {
+      gap: 8px;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 4px;
+      margin-bottom: 16px;
+    }
+    .filters::-webkit-scrollbar { display: none; }
+    .search-box {
+      flex: 0 0 100%;
+      min-width: 100%;
+      order: -1;
+      margin-bottom: 8px;
+    }
+    .search-box input {
+      font-size: 16px;
+      padding: 10px 14px 10px 38px;
+    }
+    .filter-chip {
+      padding: 8px 14px;
+      flex-shrink: 0;
+      white-space: nowrap;
+      font-size: 12px;
+    }
+
+    /* Charts */
+    .chart-card { padding: 20px 16px; }
+    .donut { width: 150px; height: 150px; }
+    .donut svg { width: 150px; height: 150px; }
+    .donut-center .num { font-size: 30px; }
+
+    /* Buttons */
+    .btn {
+      padding: 14px 22px;
+      font-size: 11px;
+      width: 100%;
+      justify-content: center;
+    }
+    .btn-ghost, .btn-primary { width: 100%; }
+    /* Cancel-edit button inline with banner shouldn't be full-width */
+    .editing-banner .btn { width: auto; padding: 10px 16px; }
+    .editing-banner {
+      flex-direction: column;
+      align-items: stretch;
+      padding: 14px 16px;
+      gap: 12px;
+    }
+    .editing-banner .btn { width: 100%; }
+
+    /* Form bottom buttons row */
+    #formNew > div:last-child {
+      flex-direction: column;
+      gap: 10px !important;
+    }
+
+    /* Toast */
+    .toast {
+      bottom: 20px;
+      right: 16px;
+      left: 16px;
+      max-width: none;
+      text-align: center;
+    }
+
+    /* Bar list */
+    .bar-item .bar-head { font-size: 12px; }
+    .bar-item .bar-head .val { font-size: 14px; }
+
+    /* Brand mobile */
+    .brand-mark { font-size: 32px; }
   }
+
+  /* ============ EXTRA SMALL (iPhone SE etc) ============ */
+  @media (max-width: 380px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+    .page-title { font-size: 26px; }
+    .kpi-value { font-size: 28px; }
+    .main { padding: 66px 12px 60px; }
+  }
+
   .menu-toggle { display: none; }
 </style>
 </head>
@@ -816,6 +1081,8 @@
 <button class="menu-toggle" id="menuToggle" aria-label="Menu">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
 </button>
+
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
 <div class="app">
   <!-- SIDEBAR -->
@@ -984,13 +1251,11 @@
               <th>Data</th>
               <th>Cliente</th>
               <th>Serviços</th>
-              <th>Valor</th>
               <th>Comissão</th>
-              <th></th>
             </tr>
           </thead>
           <tbody id="recentRows">
-            <tr><td colspan="6"><div class="empty-state"><div class="icon">∅</div>Nenhum atendimento registrado</div></td></tr>
+            <tr><td colspan="4"><div class="empty-state"><div class="icon">∅</div>Nenhum atendimento registrado</div></td></tr>
           </tbody>
         </table>
       </div>
@@ -1093,14 +1358,13 @@
               <th>Data</th>
               <th>Cliente</th>
               <th>Serviços</th>
-              <th>Valor</th>
               <th>Comissão</th>
               <th>Profissional</th>
               <th></th>
             </tr>
           </thead>
           <tbody id="histRows">
-            <tr><td colspan="7"><div class="empty-state"><div class="icon">∅</div>Nenhum atendimento registrado</div></td></tr>
+            <tr><td colspan="6"><div class="empty-state"><div class="icon">∅</div>Nenhum atendimento registrado</div></td></tr>
           </tbody>
         </table>
       </div>
@@ -1335,6 +1599,7 @@ const switchView = (view) => {
   document.getElementById('view-' + view)?.classList.add('active');
   document.querySelector(`.nav-item[data-view="${view}"]`)?.classList.add('active');
   document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarBackdrop').classList.remove('show');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
@@ -1354,6 +1619,11 @@ document.querySelectorAll('[data-nav]').forEach(el => {
 });
 document.getElementById('menuToggle')?.addEventListener('click', () => {
   document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarBackdrop').classList.toggle('show');
+});
+document.getElementById('sidebarBackdrop')?.addEventListener('click', () => {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarBackdrop').classList.remove('show');
 });
 
 /* ===================== DATE HEADER ===================== */
@@ -1637,7 +1907,7 @@ const renderDashboard = () => {
   const recent = [...state.appointments].slice(0, 5);
   const recentEl = document.getElementById('recentRows');
   if (recent.length === 0) {
-    recentEl.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">∅</div>Nenhum atendimento registrado</div></td></tr>`;
+    recentEl.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="icon">∅</div>Nenhum atendimento registrado</div></td></tr>`;
   } else {
     recentEl.innerHTML = recent.map(a => {
       const svcNames = (a.services || []).map(s => s.name).join(', ');
@@ -1645,12 +1915,10 @@ const renderDashboard = () => {
       const badge = clientVisits > 1 ? '<span class="badge recurring">Recorrente</span>' : '<span class="badge new">Novo</span>';
       return `
         <tr>
-          <td>${fmtDate(a.date)}</td>
-          <td><strong>${a.client}</strong> ${badge}</td>
-          <td style="max-width: 280px; font-size: 13px; color: var(--text-secondary);">${svcNames}</td>
-          <td><span class="price-tag">R$ ${BRL(a.total)}</span></td>
-          <td>R$ ${BRL(a.total)}</td>
-          <td></td>
+          <td data-label="Data">${fmtDate(a.date)}</td>
+          <td data-label="Cliente"><strong>${a.client}</strong> ${badge}</td>
+          <td data-label="Serviços" style="max-width: 280px; font-size: 13px; color: var(--text-secondary);">${svcNames}</td>
+          <td data-label="Comissão"><span class="price-tag">R$ ${BRL(a.total)}</span></td>
         </tr>
       `;
     }).join('');
@@ -1680,20 +1948,19 @@ const renderHistory = () => {
 
   const el = document.getElementById('histRows');
   if (list.length === 0) {
-    el.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="icon">∅</div>Nenhum atendimento encontrado</div></td></tr>`;
+    el.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">∅</div>Nenhum atendimento encontrado</div></td></tr>`;
     return;
   }
   el.innerHTML = list.map(a => {
     const svcNames = (a.services || []).map(s => s.name).join(', ');
     return `
       <tr>
-        <td>${fmtDate(a.date)}</td>
-        <td><strong>${a.client}</strong></td>
-        <td style="max-width: 320px; font-size: 13px; color: var(--text-secondary);">${svcNames}</td>
-        <td><span class="price-tag">R$ ${BRL(a.total)}</span></td>
-        <td>R$ ${BRL(a.total)}</td>
-        <td style="color: var(--text-secondary);">${a.professional || '—'}</td>
-        <td style="white-space: nowrap;">
+        <td data-label="Data">${fmtDate(a.date)}</td>
+        <td data-label="Cliente"><strong>${a.client}</strong></td>
+        <td data-label="Serviços" style="max-width: 320px; font-size: 13px; color: var(--text-secondary);">${svcNames}</td>
+        <td data-label="Comissão"><span class="price-tag">R$ ${BRL(a.total)}</span></td>
+        <td data-label="Profissional" style="color: var(--text-secondary);">${a.professional || '—'}</td>
+        <td class="actions" style="white-space: nowrap;">
           <button class="btn-icon" data-edit="${a.id}" title="Editar">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
@@ -1774,13 +2041,13 @@ const renderClients = () => {
     const avg = c.visits > 0 ? c.total / c.visits : 0;
     return `
       <tr>
-        <td><strong>${c.name}</strong></td>
-        <td style="color: var(--text-secondary); font-size: 13px;">${c.phone}</td>
-        <td><strong style="font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--gold-deep);">${c.visits}</strong></td>
-        <td>${badge}</td>
-        <td>${fmtDate(c.lastDate)}</td>
-        <td>R$ ${BRL(avg)}</td>
-        <td><span class="price-tag">R$ ${BRL(c.total)}</span></td>
+        <td data-label="Cliente"><strong>${c.name}</strong></td>
+        <td data-label="Telefone" style="color: var(--text-secondary); font-size: 13px;">${c.phone}</td>
+        <td data-label="Visitas"><strong style="font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--gold-deep);">${c.visits}</strong></td>
+        <td data-label="Status">${badge}</td>
+        <td data-label="Última visita">${fmtDate(c.lastDate)}</td>
+        <td data-label="Ticket médio">R$ ${BRL(avg)}</td>
+        <td data-label="Total gasto"><span class="price-tag">R$ ${BRL(c.total)}</span></td>
       </tr>
     `;
   }).join('');
@@ -1819,11 +2086,11 @@ const renderCommissions = () => {
   }
   el.innerHTML = rows.map(([m, d]) => `
     <tr>
-      <td style="text-transform: capitalize;"><strong>${monthName(m)}</strong></td>
-      <td>${d.count}</td>
-      <td>R$ ${BRL(d.revenue)}</td>
-      <td><span class="price-tag">R$ ${BRL(d.commission)}</span></td>
-      <td>${d.revenue > 0 ? Math.round((d.commission / d.revenue) * 100) : 0}%</td>
+      <td data-label="Mês" style="text-transform: capitalize;"><strong>${monthName(m)}</strong></td>
+      <td data-label="Atendimentos">${d.count}</td>
+      <td data-label="Faturamento">R$ ${BRL(d.revenue)}</td>
+      <td data-label="Comissão"><span class="price-tag">R$ ${BRL(d.commission)}</span></td>
+      <td data-label="% efetivo">${d.revenue > 0 ? Math.round((d.commission / d.revenue) * 100) : 0}%</td>
     </tr>
   `).join('');
 };
@@ -1838,9 +2105,9 @@ const renderServicesTable = () => {
   });
   el.innerHTML = SERVICES.map(s => `
     <tr>
-      <td><strong>${s.name}</strong></td>
-      <td><span style="font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-deep);">${s.category}</span></td>
-      <td><span class="price-tag">R$ ${BRL(s.commission)}</span></td>
+      <td data-label="Serviço"><strong>${s.name}</strong></td>
+      <td data-label="Categoria"><span style="font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-deep);">${s.category}</span></td>
+      <td data-label="Repasse"><span class="price-tag">R$ ${BRL(s.commission)}</span></td>
     </tr>
   `).join('');
 };
