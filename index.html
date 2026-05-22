@@ -1,0 +1,1656 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lavih Spa — Gestão de Atendimentos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-cream: #F5F0E8;
+    --bg-warm: #EDE4D3;
+    --bg-deep: #1A1612;
+    --bg-card: #FBF7F1;
+    --gold: #B8935A;
+    --gold-deep: #8E6E3E;
+    --gold-soft: #D9BC8A;
+    --text-primary: #2A2520;
+    --text-secondary: #6B6358;
+    --text-muted: #9A9085;
+    --accent-rose: #C9A096;
+    --accent-sage: #8B9A7C;
+    --line: rgba(184, 147, 90, 0.18);
+    --shadow-soft: 0 10px 40px -10px rgba(42, 37, 32, 0.12);
+    --shadow-card: 0 4px 20px -4px rgba(42, 37, 32, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Jost', sans-serif;
+    background: var(--bg-cream);
+    color: var(--text-primary);
+    font-weight: 400;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* Subtle paper texture */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: radial-gradient(circle at 20% 20%, rgba(184,147,90,0.04) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 70%, rgba(201,160,150,0.05) 0%, transparent 50%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .app { display: flex; min-height: 100vh; position: relative; z-index: 1; }
+
+  /* ============ SIDEBAR ============ */
+  .sidebar {
+    width: 260px;
+    background: var(--bg-deep);
+    color: #E8DFCF;
+    padding: 36px 28px;
+    display: flex; flex-direction: column;
+    position: sticky; top: 0; height: 100vh;
+    border-right: 1px solid rgba(184,147,90,0.15);
+  }
+
+  .brand {
+    margin-bottom: 48px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid rgba(184,147,90,0.2);
+  }
+  .brand-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 38px; font-weight: 300;
+    letter-spacing: 0.16em;
+    color: var(--gold-soft);
+    line-height: 1;
+  }
+  .brand-mark em {
+    font-style: italic; font-weight: 400;
+    color: #fff;
+  }
+  .brand-sub {
+    margin-top: 8px;
+    font-size: 10px; letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(232,223,207,0.55);
+    font-weight: 500;
+  }
+
+  .nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+  .nav-label {
+    font-size: 10px; letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: rgba(232,223,207,0.4);
+    margin: 20px 12px 10px;
+    font-weight: 500;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 14px; border-radius: 6px;
+    color: rgba(232,223,207,0.7);
+    font-size: 14px; font-weight: 400;
+    cursor: pointer;
+    transition: all .25s ease;
+    border-left: 2px solid transparent;
+  }
+  .nav-item:hover {
+    background: rgba(184,147,90,0.08);
+    color: #fff;
+  }
+  .nav-item.active {
+    background: rgba(184,147,90,0.12);
+    color: var(--gold-soft);
+    border-left-color: var(--gold);
+  }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  .sidebar-foot {
+    padding-top: 20px;
+    border-top: 1px solid rgba(184,147,90,0.15);
+    font-size: 11px;
+    color: rgba(232,223,207,0.4);
+    letter-spacing: 0.08em;
+  }
+  .status-dot {
+    display: inline-block; width: 6px; height: 6px;
+    border-radius: 50%; background: var(--accent-sage);
+    margin-right: 8px;
+    box-shadow: 0 0 8px var(--accent-sage);
+  }
+
+  /* ============ MAIN ============ */
+  .main {
+    flex: 1;
+    padding: 40px 56px 80px;
+    max-width: calc(100vw - 260px);
+  }
+
+  .page-head {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 40px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--line);
+  }
+  .page-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 44px; font-weight: 300;
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .page-title em {
+    font-style: italic; color: var(--gold-deep);
+    font-weight: 400;
+  }
+  .page-sub {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    letter-spacing: 0.04em;
+  }
+  .page-date {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    text-align: right;
+  }
+  .page-date strong {
+    display: block;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; font-weight: 400;
+    letter-spacing: 0.02em;
+    color: var(--text-primary);
+    text-transform: capitalize;
+    margin-top: 4px;
+  }
+
+  /* ============ KPI CARDS ============ */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+  .kpi {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform .3s ease, box-shadow .3s ease;
+  }
+  .kpi:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card);
+  }
+  .kpi::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold) 0%, var(--gold-soft) 100%);
+    opacity: 0.5;
+  }
+  .kpi-label {
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .kpi-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 40px; font-weight: 400;
+    margin-top: 8px;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+  .kpi-value .currency {
+    font-size: 18px;
+    color: var(--gold-deep);
+    margin-right: 4px;
+    vertical-align: top;
+    position: relative; top: 6px;
+  }
+  .kpi-foot {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .kpi-foot .pill {
+    background: rgba(139,154,124,0.15);
+    color: var(--accent-sage);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  /* ============ SECTIONS ============ */
+  .section {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 32px;
+    margin-bottom: 28px;
+  }
+  .section-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 24px;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px; font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .section-title em { font-style: italic; color: var(--gold-deep); font-weight: 400; }
+  .section-sub {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* ============ BUTTONS ============ */
+  .btn {
+    border: none;
+    padding: 12px 22px;
+    font-family: 'Jost', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all .25s ease;
+    border-radius: 2px;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary {
+    background: var(--bg-deep);
+    color: var(--gold-soft);
+    border: 1px solid var(--bg-deep);
+  }
+  .btn-primary:hover {
+    background: var(--gold-deep);
+    border-color: var(--gold-deep);
+    color: #fff;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--line);
+  }
+  .btn-ghost:hover {
+    border-color: var(--gold);
+    color: var(--gold-deep);
+  }
+  .btn-icon {
+    padding: 8px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-muted);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all .2s ease;
+  }
+  .btn-icon:hover { color: var(--gold-deep); background: rgba(184,147,90,0.08); }
+  .btn-icon.danger:hover { color: #C04545; background: rgba(192,69,69,0.08); }
+
+  /* ============ FORM ============ */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  .form-field { display: flex; flex-direction: column; }
+  .form-field.full { grid-column: 1 / -1; }
+  .form-label {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .form-input, .form-select, .form-textarea {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    padding: 10px 0;
+    font-family: 'Jost', sans-serif;
+    font-size: 15px;
+    color: var(--text-primary);
+    transition: border-color .2s ease;
+    border-radius: 0;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    outline: none;
+    border-bottom-color: var(--gold);
+  }
+  .form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238E6E3E' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0 center;
+    padding-right: 24px;
+  }
+  .form-textarea { resize: vertical; min-height: 60px; font-family: 'Jost', sans-serif; }
+
+  .service-picker {
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 16px;
+    max-height: 280px;
+    overflow-y: auto;
+    background: var(--bg-warm);
+  }
+  .service-picker::-webkit-scrollbar { width: 6px; }
+  .service-picker::-webkit-scrollbar-thumb { background: var(--gold-soft); border-radius: 3px; }
+  .service-picker::-webkit-scrollbar-track { background: transparent; }
+
+  .service-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 10px;
+    border-bottom: 1px dashed var(--line);
+    cursor: pointer;
+    transition: background .15s ease;
+  }
+  .service-row:last-child { border-bottom: none; }
+  .service-row:hover { background: rgba(184,147,90,0.06); }
+  .service-row.selected { background: rgba(184,147,90,0.14); }
+  .service-row .name {
+    font-size: 13px;
+    color: var(--text-primary);
+  }
+  .service-row .price {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    color: var(--gold-deep);
+    font-weight: 500;
+  }
+  .service-row .check {
+    width: 16px; height: 16px;
+    border: 1.5px solid var(--gold-soft);
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg-card);
+  }
+  .service-row.selected .check {
+    background: var(--gold-deep);
+    border-color: var(--gold-deep);
+  }
+  .service-row.selected .check::after {
+    content: '✓';
+    color: #fff;
+    font-size: 11px;
+    line-height: 1;
+  }
+
+  .selected-summary {
+    background: var(--bg-warm);
+    padding: 16px 18px;
+    border-left: 2px solid var(--gold);
+    border-radius: 2px;
+  }
+  .summary-line {
+    display: flex; justify-content: space-between;
+    padding: 4px 0;
+    font-size: 13px;
+  }
+  .summary-line.total {
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+    margin-top: 10px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    color: var(--gold-deep);
+    font-weight: 500;
+  }
+
+  /* ============ TABLE ============ */
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .table th {
+    text-align: left;
+    padding: 12px 14px;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 500;
+    border-bottom: 1px solid var(--line);
+  }
+  .table td {
+    padding: 16px 14px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--line);
+    color: var(--text-primary);
+  }
+  .table tr:last-child td { border-bottom: none; }
+  .table tr:hover td { background: rgba(184,147,90,0.03); }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .badge.recurring {
+    background: rgba(184,147,90,0.15);
+    color: var(--gold-deep);
+  }
+  .badge.new {
+    background: rgba(139,154,124,0.18);
+    color: var(--accent-sage);
+  }
+  .badge.vip {
+    background: var(--bg-deep);
+    color: var(--gold-soft);
+  }
+
+  .price-tag {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px;
+    color: var(--gold-deep);
+    font-weight: 500;
+  }
+
+  .empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--text-muted);
+  }
+  .empty-state .icon {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 60px;
+    color: var(--gold-soft);
+    margin-bottom: 12px;
+    font-style: italic;
+  }
+
+  /* ============ FILTERS ============ */
+  .filters {
+    display: flex; gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .filter-chip {
+    padding: 6px 14px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all .2s ease;
+    background: transparent;
+    font-family: 'Jost', sans-serif;
+    letter-spacing: 0.04em;
+  }
+  .filter-chip:hover { border-color: var(--gold); color: var(--gold-deep); }
+  .filter-chip.active {
+    background: var(--bg-deep);
+    border-color: var(--bg-deep);
+    color: var(--gold-soft);
+  }
+  .search-box {
+    flex: 1;
+    min-width: 240px;
+    position: relative;
+  }
+  .search-box input {
+    width: 100%;
+    padding: 9px 14px 9px 38px;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--bg-cream);
+    font-family: 'Jost', sans-serif;
+    font-size: 13px;
+    color: var(--text-primary);
+  }
+  .search-box input:focus { outline: none; border-color: var(--gold); }
+  .search-box svg {
+    position: absolute; left: 14px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    width: 14px; height: 14px;
+  }
+
+  /* ============ MODAL / TOAST ============ */
+  .toast {
+    position: fixed;
+    bottom: 32px; right: 32px;
+    background: var(--bg-deep);
+    color: var(--gold-soft);
+    padding: 14px 22px;
+    border-radius: 4px;
+    border-left: 3px solid var(--gold);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    box-shadow: var(--shadow-soft);
+    transform: translateY(100px); opacity: 0;
+    transition: all .35s ease;
+    z-index: 1000;
+    max-width: 360px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.error { border-left-color: #C04545; color: #F2D0CC; }
+
+  /* ============ VIEW SWITCH ============ */
+  .view { display: none; animation: fadeIn .4s ease; }
+  .view.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============ CHART ============ */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+  }
+  .chart-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 28px;
+  }
+  .bar-list { display: flex; flex-direction: column; gap: 14px; margin-top: 20px; }
+  .bar-item .bar-head {
+    display: flex; justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .bar-item .bar-head .name { color: var(--text-primary); }
+  .bar-item .bar-head .val { color: var(--gold-deep); font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 500; }
+  .bar-track {
+    height: 6px;
+    background: var(--bg-warm);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold) 0%, var(--gold-soft) 100%);
+    border-radius: 3px;
+    width: 0;
+    transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .donut-wrap { display: flex; flex-direction: column; align-items: center; }
+  .donut { position: relative; width: 180px; height: 180px; margin: 12px 0 20px; }
+  .donut svg { transform: rotate(-90deg); }
+  .donut-center {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+  }
+  .donut-center .num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 38px;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+  .donut-center .lbl {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .legend { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+  .legend-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .legend-row:last-child { border-bottom: none; }
+  .legend-dot {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+
+  /* ============ LOADER ============ */
+  .loader {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid var(--gold-soft);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .splash {
+    position: fixed; inset: 0;
+    background: var(--bg-cream);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    z-index: 9999;
+    transition: opacity .5s ease;
+  }
+  .splash.hide { opacity: 0; pointer-events: none; }
+  .splash-mark {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 64px; font-weight: 300;
+    letter-spacing: 0.18em;
+    color: var(--gold-deep);
+  }
+  .splash-mark em { font-style: italic; color: var(--text-primary); }
+  .splash-sub {
+    margin-top: 12px;
+    font-size: 11px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .splash-loader {
+    margin-top: 28px;
+    width: 60px; height: 1px;
+    background: var(--line);
+    overflow: hidden;
+    position: relative;
+  }
+  .splash-loader::after {
+    content: '';
+    position: absolute;
+    height: 100%; width: 30%;
+    background: var(--gold);
+    animation: slide 1.4s ease-in-out infinite;
+  }
+  @keyframes slide {
+    0% { left: -30%; } 100% { left: 100%; }
+  }
+
+  /* ============ MOBILE ============ */
+  @media (max-width: 1100px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .chart-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .sidebar {
+      position: fixed; width: 220px;
+      transform: translateX(-100%);
+      transition: transform .3s ease;
+      z-index: 100;
+    }
+    .sidebar.open { transform: translateX(0); }
+    .main { max-width: 100vw; padding: 24px 20px 80px; }
+    .page-head { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .page-title { font-size: 32px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .menu-toggle {
+      display: flex; position: fixed; top: 16px; left: 16px;
+      width: 40px; height: 40px;
+      background: var(--bg-deep); color: var(--gold-soft);
+      border-radius: 4px;
+      align-items: center; justify-content: center;
+      z-index: 50; cursor: pointer; border: none;
+    }
+    .kpi-grid { grid-template-columns: 1fr; }
+  }
+  .menu-toggle { display: none; }
+</style>
+</head>
+<body>
+
+<div class="splash" id="splash">
+  <div class="splash-mark">L<em>av</em>ih</div>
+  <div class="splash-sub">Gestão de Atendimentos</div>
+  <div class="splash-loader"></div>
+</div>
+
+<button class="menu-toggle" id="menuToggle" aria-label="Menu">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">L<em>av</em>ih</div>
+      <div class="brand-sub">Spa · Gestão</div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-label">Operação</div>
+      <div class="nav-item active" data-view="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        Painel
+      </div>
+      <div class="nav-item" data-view="new">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Novo Atendimento
+      </div>
+      <div class="nav-item" data-view="history">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg>
+        Histórico
+      </div>
+
+      <div class="nav-label">Análise</div>
+      <div class="nav-item" data-view="clients">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Clientes
+      </div>
+      <div class="nav-item" data-view="commissions">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Comissões
+      </div>
+      <div class="nav-item" data-view="services">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Serviços
+      </div>
+    </nav>
+
+    <div class="sidebar-foot">
+      <span class="status-dot"></span>Conectado · Firebase
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ============ DASHBOARD ============ -->
+    <section class="view active" id="view-dashboard">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">Painel <em>do dia</em></h1>
+          <p class="page-sub">Visão geral dos atendimentos, faturamento e comissões</p>
+        </div>
+        <div class="page-date">
+          <span id="dateLabel">—</span>
+          <strong id="dateFull">—</strong>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-label">Atendimentos hoje</div>
+          <div class="kpi-value" id="kpiToday">0</div>
+          <div class="kpi-foot"><span class="pill" id="kpiTodayPill">0</span> esta semana</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Faturamento — mês</div>
+          <div class="kpi-value"><span class="currency">R$</span><span id="kpiRevenue">0</span></div>
+          <div class="kpi-foot"><span id="kpiRevenueCount">0</span> atendimentos no período</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Comissão a receber</div>
+          <div class="kpi-value"><span class="currency">R$</span><span id="kpiCommission">0</span></div>
+          <div class="kpi-foot">Repasse devido — mês corrente</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Clientes recorrentes</div>
+          <div class="kpi-value" id="kpiRecurring">0</div>
+          <div class="kpi-foot"><span id="kpiRecurringRate">0</span>% taxa de retorno</div>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="section-head">
+            <div>
+              <div class="section-sub">Top serviços</div>
+              <div class="section-title">Mais <em>realizados</em></div>
+            </div>
+          </div>
+          <div class="bar-list" id="topServices">
+            <div class="empty-state" style="padding: 30px;">
+              <div class="icon">∅</div>
+              Sem dados ainda
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="section-head">
+            <div>
+              <div class="section-sub">Mix de clientes</div>
+              <div class="section-title"><em>Novos</em> vs recorrentes</div>
+            </div>
+          </div>
+          <div class="donut-wrap">
+            <div class="donut">
+              <svg width="180" height="180" viewBox="0 0 180 180">
+                <circle cx="90" cy="90" r="70" fill="none" stroke="var(--bg-warm)" stroke-width="18"/>
+                <circle id="donutFill" cx="90" cy="90" r="70" fill="none" stroke="var(--gold)" stroke-width="18"
+                        stroke-dasharray="0 440" stroke-linecap="butt"
+                        style="transition: stroke-dasharray 1.2s cubic-bezier(0.4,0,0.2,1);"/>
+              </svg>
+              <div class="donut-center">
+                <div class="num" id="donutNum">0%</div>
+                <div class="lbl">Retorno</div>
+              </div>
+            </div>
+            <div class="legend">
+              <div class="legend-row">
+                <span><span class="legend-dot" style="background: var(--gold);"></span>Recorrentes</span>
+                <strong id="legendRecurring">0</strong>
+              </div>
+              <div class="legend-row">
+                <span><span class="legend-dot" style="background: var(--bg-warm); border: 1px solid var(--line);"></span>Novos</span>
+                <strong id="legendNew">0</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" style="margin-top: 28px;">
+        <div class="section-head">
+          <div>
+            <div class="section-sub">Últimos registros</div>
+            <div class="section-title">Atendimentos <em>recentes</em></div>
+          </div>
+          <button class="btn btn-ghost" data-nav="history">Ver todos</button>
+        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Cliente</th>
+              <th>Serviços</th>
+              <th>Valor</th>
+              <th>Comissão</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="recentRows">
+            <tr><td colspan="6"><div class="empty-state"><div class="icon">∅</div>Nenhum atendimento registrado</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ NEW APPOINTMENT ============ -->
+    <section class="view" id="view-new">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">Novo <em>atendimento</em></h1>
+          <p class="page-sub">Registrar atendimento, serviços e calcular comissão</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <form id="formNew">
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="form-label">Cliente</label>
+              <input type="text" class="form-input" id="fClient" placeholder="Nome completo" required list="clientsList" autocomplete="off">
+              <datalist id="clientsList"></datalist>
+            </div>
+            <div class="form-field">
+              <label class="form-label">Telefone (opcional)</label>
+              <input type="tel" class="form-input" id="fPhone" placeholder="(00) 00000-0000">
+            </div>
+            <div class="form-field">
+              <label class="form-label">Data do atendimento</label>
+              <input type="date" class="form-input" id="fDate" required>
+            </div>
+            <div class="form-field">
+              <label class="form-label">Profissional</label>
+              <input type="text" class="form-input" id="fProfessional" placeholder="Nome da profissional" value="Ingrid">
+            </div>
+
+            <div class="form-field full">
+              <label class="form-label">Serviços realizados</label>
+              <div class="service-picker" id="servicePicker"></div>
+            </div>
+
+            <div class="form-field full">
+              <label class="form-label">Resumo</label>
+              <div class="selected-summary" id="summary">
+                <div class="summary-line" style="color: var(--text-muted); font-style: italic;">Selecione ao menos um serviço acima</div>
+              </div>
+            </div>
+
+            <div class="form-field full">
+              <label class="form-label">Observações (opcional)</label>
+              <textarea class="form-textarea" id="fNotes" placeholder="Anotações sobre o atendimento, preferências, intercorrências..."></textarea>
+            </div>
+          </div>
+
+          <div style="margin-top: 28px; display: flex; gap: 12px;">
+            <button type="submit" class="btn btn-primary" id="btnSave">
+              <span id="btnSaveText">Registrar atendimento</span>
+            </button>
+            <button type="button" class="btn btn-ghost" onclick="resetForm()">Limpar</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ============ HISTORY ============ -->
+    <section class="view" id="view-history">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title"><em>Histórico</em> de atendimentos</h1>
+          <p class="page-sub">Todos os registros, ordenados por data</p>
+        </div>
+        <button class="btn btn-primary" data-nav="new">+ Novo atendimento</button>
+      </div>
+
+      <div class="section">
+        <div class="filters">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchHist" placeholder="Buscar por cliente, serviço...">
+          </div>
+          <button class="filter-chip active" data-filter="all">Todos</button>
+          <button class="filter-chip" data-filter="today">Hoje</button>
+          <button class="filter-chip" data-filter="week">7 dias</button>
+          <button class="filter-chip" data-filter="month">Mês atual</button>
+        </div>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Cliente</th>
+              <th>Serviços</th>
+              <th>Valor</th>
+              <th>Comissão</th>
+              <th>Profissional</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="histRows">
+            <tr><td colspan="7"><div class="empty-state"><div class="icon">∅</div>Nenhum atendimento registrado</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ CLIENTS ============ -->
+    <section class="view" id="view-clients">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">Base de <em>clientes</em></h1>
+          <p class="page-sub">Recorrência, ticket médio e histórico individual</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="filters">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchClient" placeholder="Buscar cliente...">
+          </div>
+          <button class="filter-chip active" data-cfilter="all">Todos</button>
+          <button class="filter-chip" data-cfilter="recurring">Recorrentes</button>
+          <button class="filter-chip" data-cfilter="vip">VIP (5+ visitas)</button>
+          <button class="filter-chip" data-cfilter="new">Novos</button>
+        </div>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Telefone</th>
+              <th>Visitas</th>
+              <th>Status</th>
+              <th>Última visita</th>
+              <th>Ticket médio</th>
+              <th>Total gasto</th>
+            </tr>
+          </thead>
+          <tbody id="clientRows">
+            <tr><td colspan="7"><div class="empty-state"><div class="icon">∅</div>Nenhum cliente cadastrado</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ COMMISSIONS ============ -->
+    <section class="view" id="view-commissions">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">Comissões a <em>receber</em></h1>
+          <p class="page-sub">Repasses agrupados por mês</p>
+        </div>
+      </div>
+
+      <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="kpi">
+          <div class="kpi-label">Mês corrente</div>
+          <div class="kpi-value"><span class="currency">R$</span><span id="commCurrent">0</span></div>
+          <div class="kpi-foot"><span id="commCurrentCount">0</span> atendimentos</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Mês anterior</div>
+          <div class="kpi-value"><span class="currency">R$</span><span id="commPrev">0</span></div>
+          <div class="kpi-foot">Pago no mês corrente</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Total acumulado</div>
+          <div class="kpi-value"><span class="currency">R$</span><span id="commTotal">0</span></div>
+          <div class="kpi-foot">Desde o início</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <div>
+            <div class="section-sub">Detalhamento</div>
+            <div class="section-title">Comissões por <em>mês</em></div>
+          </div>
+        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Mês de referência</th>
+              <th>Atendimentos</th>
+              <th>Faturamento</th>
+              <th>Comissão</th>
+              <th>% efetivo</th>
+            </tr>
+          </thead>
+          <tbody id="commRows">
+            <tr><td colspan="5"><div class="empty-state"><div class="icon">∅</div>Sem dados</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ SERVICES ============ -->
+    <section class="view" id="view-services">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">Tabela de <em>serviços</em></h1>
+          <p class="page-sub">Catálogo completo com valores de repasse</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Serviço</th>
+              <th>Categoria</th>
+              <th>Valor de repasse</th>
+            </tr>
+          </thead>
+          <tbody id="servicesRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ============ FIREBASE ============ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, getDocs, deleteDoc, doc,
+  query, orderBy, serverTimestamp, onSnapshot, where
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDW1vSJTbteWWZ9RvJ7K1o4Ey-2cbllMHA",
+  authDomain: "lavih-ingrid.firebaseapp.com",
+  projectId: "lavih-ingrid",
+  storageBucket: "lavih-ingrid.firebasestorage.app",
+  messagingSenderId: "897601356825",
+  appId: "1:897601356825:web:a36428672b97d058375688"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+window._db = db;
+window._fb = { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp, onSnapshot, where };
+window.dispatchEvent(new Event('firebase-ready'));
+</script>
+
+<script>
+/* ===================== SERVICES CATALOG ===================== */
+const SERVICES = [
+  // Página 1
+  { id: "s01", name: "Hair Spa Harmonia Capilar", commission: 30, category: "Head Spa" },
+  { id: "s02", name: "Hair Spa Harmonia Total 120 min", commission: 60, category: "Head Spa" },
+  { id: "s03", name: "Hair Spa Harmonia Total 100 min", commission: 50, category: "Head Spa" },
+  { id: "s04", name: "Drenagem Linfática Sensorial", commission: 30, category: "Drenagem" },
+  { id: "s05", name: "Ritual das Pedras Quentes", commission: 30, category: "Massagem" },
+  { id: "s06", name: "Limpeza de Pele Relax", commission: 40, category: "Estética Facial" },
+  { id: "s07", name: "Limpeza de Pele Relaxante Supreme", commission: 50, category: "Estética Facial" },
+  { id: "s08", name: "Massagem Restaurativa com Ventosa", commission: 30, category: "Massagem" },
+  { id: "s09", name: "Spa dos Pés Revitalizante", commission: 30, category: "Pés & Mãos" },
+  { id: "s10", name: "Purificação dos Pés", commission: 5, category: "Pés & Mãos" },
+  { id: "s11", name: "Esfoliação das Mãos", commission: 5, category: "Pés & Mãos" },
+  { id: "s12", name: "Hidratação Labial com Colágeno", commission: 5, category: "Estética Facial" },
+  { id: "s13", name: "Drenagem Facial Glow", commission: 15, category: "Estética Facial" },
+  { id: "s14", name: "Adicional Ritual Pele de Ouro", commission: 10, category: "Adicional" },
+  { id: "s15", name: "Ozonioterapia", commission: 5, category: "Tratamento" },
+  { id: "s16", name: "Terapia Men Regeneração", commission: 30, category: "Masculino" },
+  { id: "s17", name: "Gestação Tranquila", commission: 40, category: "Gestante" },
+  { id: "s18", name: "Renovação Pós-Parto", commission: 30, category: "Gestante" },
+  { id: "s19", name: "Desobstrução Couro Cabeludo", commission: 35, category: "Head Spa" },
+  // Página 2
+  { id: "s20", name: "Detox Capilar", commission: 35, category: "Head Spa" },
+  { id: "s21", name: "Detox Capilar com Argila Branca", commission: 30, category: "Head Spa" },
+  { id: "s22", name: "Estímulo Vitamina A", commission: 35, category: "Head Spa" },
+  { id: "s23", name: "Estímulo Vitamina E", commission: 35, category: "Head Spa" },
+  { id: "s24", name: "Estímulo Vitamina B5", commission: 35, category: "Head Spa" },
+  { id: "s25", name: "Ritual das Pedras Quentes Supreme", commission: 30, category: "Massagem" },
+  { id: "s26", name: "Massagem Express", commission: 15, category: "Massagem" },
+  { id: "s27", name: "Massagem Desportiva", commission: 30, category: "Massagem" },
+  { id: "s28", name: "Spa Kids", commission: 30, category: "Especial" },
+  { id: "s29", name: "Adicional Massagem Restaurativa com Ventosa (25min)", commission: 15, category: "Adicional" },
+  { id: "s30", name: "Minutos Adicionais (20 min extra)", commission: 10, category: "Adicional" },
+  { id: "s31", name: "Mini Day Spa Detox", commission: 85, category: "Day Spa" },
+  { id: "s32", name: "Mini Day Spa Renovação", commission: 75, category: "Day Spa" },
+  { id: "s33", name: "Mini Day Spa Pele", commission: 80, category: "Day Spa" },
+];
+
+/* ===================== STATE ===================== */
+const state = {
+  appointments: [],
+  selectedServices: new Set(),
+  filterHistory: 'all',
+  filterClients: 'all',
+  searchHist: '',
+  searchClient: '',
+  unsub: null,
+};
+
+const BRL = v => new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v || 0);
+const todayISO = () => new Date().toISOString().slice(0, 10);
+const monthKey = d => { const dt = new Date(d); return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`; };
+const fmtDate = d => {
+  if (!d) return '—';
+  const dt = new Date(d + 'T12:00:00');
+  return dt.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+};
+const monthName = ym => {
+  const [y, m] = ym.split('-');
+  const dt = new Date(parseInt(y), parseInt(m) - 1, 1);
+  return dt.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+};
+const norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+
+/* ===================== TOAST ===================== */
+const toast = (msg, isError = false) => {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.toggle('error', isError);
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3400);
+};
+
+/* ===================== NAV ===================== */
+const switchView = (view) => {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-' + view)?.classList.add('active');
+  document.querySelector(`.nav-item[data-view="${view}"]`)?.classList.add('active');
+  document.getElementById('sidebar').classList.remove('open');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+document.querySelectorAll('[data-view]').forEach(el => {
+  el.addEventListener('click', () => switchView(el.dataset.view));
+});
+document.querySelectorAll('[data-nav]').forEach(el => {
+  el.addEventListener('click', () => switchView(el.dataset.nav));
+});
+document.getElementById('menuToggle')?.addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('open');
+});
+
+/* ===================== DATE HEADER ===================== */
+const now = new Date();
+document.getElementById('dateLabel').textContent = now.toLocaleDateString('pt-BR', { weekday: 'long' });
+document.getElementById('dateFull').textContent = now.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' });
+
+/* ===================== SERVICE PICKER ===================== */
+const renderServicePicker = () => {
+  const wrap = document.getElementById('servicePicker');
+  wrap.innerHTML = SERVICES.map(s => `
+    <div class="service-row ${state.selectedServices.has(s.id) ? 'selected' : ''}" data-id="${s.id}">
+      <div>
+        <div class="name">${s.name}</div>
+        <div style="font-size: 10px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px;">${s.category}</div>
+      </div>
+      <div class="price">R$ ${BRL(s.commission)}</div>
+      <div class="check"></div>
+    </div>
+  `).join('');
+
+  wrap.querySelectorAll('.service-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const id = row.dataset.id;
+      if (state.selectedServices.has(id)) state.selectedServices.delete(id);
+      else state.selectedServices.add(id);
+      row.classList.toggle('selected');
+      renderSummary();
+    });
+  });
+};
+
+const renderSummary = () => {
+  const sum = document.getElementById('summary');
+  if (state.selectedServices.size === 0) {
+    sum.innerHTML = '<div class="summary-line" style="color: var(--text-muted); font-style: italic;">Selecione ao menos um serviço acima</div>';
+    return;
+  }
+  const items = SERVICES.filter(s => state.selectedServices.has(s.id));
+  const total = items.reduce((a, s) => a + s.commission, 0);
+  sum.innerHTML = items.map(s => `
+    <div class="summary-line">
+      <span>${s.name}</span>
+      <span>R$ ${BRL(s.commission)}</span>
+    </div>
+  `).join('') + `
+    <div class="summary-line total">
+      <span>Comissão total</span>
+      <span>R$ ${BRL(total)}</span>
+    </div>
+  `;
+};
+
+/* ===================== FORM SUBMIT ===================== */
+document.getElementById('fDate').value = todayISO();
+
+document.getElementById('formNew').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (state.selectedServices.size === 0) {
+    toast('Selecione ao menos um serviço', true);
+    return;
+  }
+  const client = document.getElementById('fClient').value.trim();
+  const phone = document.getElementById('fPhone').value.trim();
+  const date = document.getElementById('fDate').value;
+  const professional = document.getElementById('fProfessional').value.trim() || 'Ingrid';
+  const notes = document.getElementById('fNotes').value.trim();
+
+  if (!client || !date) {
+    toast('Preencha cliente e data', true);
+    return;
+  }
+
+  const serviceIds = Array.from(state.selectedServices);
+  const services = SERVICES.filter(s => serviceIds.includes(s.id))
+    .map(s => ({ id: s.id, name: s.name, commission: s.commission, category: s.category }));
+  const total = services.reduce((a, s) => a + s.commission, 0);
+
+  const btn = document.getElementById('btnSave');
+  const btnTxt = document.getElementById('btnSaveText');
+  btn.disabled = true;
+  btnTxt.innerHTML = '<span class="loader"></span>';
+
+  try {
+    const { collection, addDoc, serverTimestamp } = window._fb;
+    await addDoc(collection(window._db, 'appointments'), {
+      client, clientKey: norm(client),
+      phone, date, professional, notes,
+      services, total,
+      createdAt: serverTimestamp(),
+    });
+    toast('Atendimento registrado com sucesso');
+    resetForm();
+    switchView('dashboard');
+  } catch (err) {
+    console.error(err);
+    toast('Erro ao salvar: ' + err.message, true);
+  } finally {
+    btn.disabled = false;
+    btnTxt.textContent = 'Registrar atendimento';
+  }
+});
+
+const resetForm = () => {
+  document.getElementById('formNew').reset();
+  document.getElementById('fDate').value = todayISO();
+  document.getElementById('fProfessional').value = 'Ingrid';
+  state.selectedServices.clear();
+  renderServicePicker();
+  renderSummary();
+};
+window.resetForm = resetForm;
+
+/* ===================== AGGREGATIONS ===================== */
+const computeClients = () => {
+  const map = new Map();
+  state.appointments.forEach(a => {
+    const key = a.clientKey || norm(a.client);
+    if (!map.has(key)) {
+      map.set(key, {
+        name: a.client, phone: a.phone || '—',
+        visits: 0, total: 0, lastDate: '', appointments: []
+      });
+    }
+    const c = map.get(key);
+    c.visits += 1;
+    c.total += a.total || 0;
+    if (!c.lastDate || a.date > c.lastDate) c.lastDate = a.date;
+    c.appointments.push(a);
+  });
+  return Array.from(map.values()).sort((a, b) => b.lastDate.localeCompare(a.lastDate));
+};
+
+/* ===================== DASHBOARD ===================== */
+const renderDashboard = () => {
+  const today = todayISO();
+  const now = new Date();
+  const monthStart = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+  const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
+  const weekISO = weekAgo.toISOString().slice(0, 10);
+
+  const todayApts = state.appointments.filter(a => a.date === today);
+  const weekApts = state.appointments.filter(a => a.date >= weekISO);
+  const monthApts = state.appointments.filter(a => a.date >= monthStart);
+
+  document.getElementById('kpiToday').textContent = todayApts.length;
+  document.getElementById('kpiTodayPill').textContent = weekApts.length;
+  const revenue = monthApts.reduce((a, x) => a + (x.total || 0), 0);
+  document.getElementById('kpiRevenue').textContent = BRL(revenue);
+  document.getElementById('kpiRevenueCount').textContent = monthApts.length;
+  document.getElementById('kpiCommission').textContent = BRL(revenue);
+
+  const clients = computeClients();
+  const recurring = clients.filter(c => c.visits > 1).length;
+  document.getElementById('kpiRecurring').textContent = recurring;
+  const rate = clients.length > 0 ? Math.round((recurring / clients.length) * 100) : 0;
+  document.getElementById('kpiRecurringRate').textContent = rate;
+
+  // Donut
+  const newClients = clients.length - recurring;
+  document.getElementById('legendRecurring').textContent = recurring;
+  document.getElementById('legendNew').textContent = newClients;
+  document.getElementById('donutNum').textContent = rate + '%';
+  const circumference = 2 * Math.PI * 70;
+  const fillLen = (rate / 100) * circumference;
+  setTimeout(() => {
+    document.getElementById('donutFill').setAttribute('stroke-dasharray', `${fillLen} ${circumference}`);
+  }, 100);
+
+  // Top services
+  const svcCount = {};
+  state.appointments.forEach(a => {
+    (a.services || []).forEach(s => {
+      svcCount[s.name] = (svcCount[s.name] || 0) + 1;
+    });
+  });
+  const sorted = Object.entries(svcCount).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const max = sorted[0]?.[1] || 1;
+  const topEl = document.getElementById('topServices');
+  if (sorted.length === 0) {
+    topEl.innerHTML = `<div class="empty-state" style="padding: 30px;"><div class="icon">∅</div>Sem dados ainda</div>`;
+  } else {
+    topEl.innerHTML = sorted.map(([n, c]) => `
+      <div class="bar-item">
+        <div class="bar-head"><span class="name">${n}</span><span class="val">${c}</span></div>
+        <div class="bar-track"><div class="bar-fill" data-width="${(c / max) * 100}"></div></div>
+      </div>
+    `).join('');
+    setTimeout(() => {
+      topEl.querySelectorAll('.bar-fill').forEach(b => b.style.width = b.dataset.width + '%');
+    }, 50);
+  }
+
+  // Recent
+  const recent = [...state.appointments].slice(0, 5);
+  const recentEl = document.getElementById('recentRows');
+  if (recent.length === 0) {
+    recentEl.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">∅</div>Nenhum atendimento registrado</div></td></tr>`;
+  } else {
+    recentEl.innerHTML = recent.map(a => {
+      const svcNames = (a.services || []).map(s => s.name).join(', ');
+      const clientVisits = clients.find(c => norm(c.name) === norm(a.client))?.visits || 1;
+      const badge = clientVisits > 1 ? '<span class="badge recurring">Recorrente</span>' : '<span class="badge new">Novo</span>';
+      return `
+        <tr>
+          <td>${fmtDate(a.date)}</td>
+          <td><strong>${a.client}</strong> ${badge}</td>
+          <td style="max-width: 280px; font-size: 13px; color: var(--text-secondary);">${svcNames}</td>
+          <td><span class="price-tag">R$ ${BRL(a.total)}</span></td>
+          <td>R$ ${BRL(a.total)}</td>
+          <td></td>
+        </tr>
+      `;
+    }).join('');
+  }
+};
+
+/* ===================== HISTORY ===================== */
+const renderHistory = () => {
+  let list = [...state.appointments];
+  const today = todayISO();
+  const now = new Date();
+  const monthStart = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+  const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
+  const weekISO = weekAgo.toISOString().slice(0, 10);
+
+  if (state.filterHistory === 'today') list = list.filter(a => a.date === today);
+  if (state.filterHistory === 'week') list = list.filter(a => a.date >= weekISO);
+  if (state.filterHistory === 'month') list = list.filter(a => a.date >= monthStart);
+
+  const q = norm(state.searchHist);
+  if (q) {
+    list = list.filter(a =>
+      norm(a.client).includes(q) ||
+      (a.services || []).some(s => norm(s.name).includes(q))
+    );
+  }
+
+  const el = document.getElementById('histRows');
+  if (list.length === 0) {
+    el.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="icon">∅</div>Nenhum atendimento encontrado</div></td></tr>`;
+    return;
+  }
+  el.innerHTML = list.map(a => {
+    const svcNames = (a.services || []).map(s => s.name).join(', ');
+    return `
+      <tr>
+        <td>${fmtDate(a.date)}</td>
+        <td><strong>${a.client}</strong></td>
+        <td style="max-width: 320px; font-size: 13px; color: var(--text-secondary);">${svcNames}</td>
+        <td><span class="price-tag">R$ ${BRL(a.total)}</span></td>
+        <td>R$ ${BRL(a.total)}</td>
+        <td style="color: var(--text-secondary);">${a.professional || '—'}</td>
+        <td>
+          <button class="btn-icon danger" data-del="${a.id}" title="Excluir">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  el.querySelectorAll('[data-del]').forEach(b => {
+    b.addEventListener('click', async () => {
+      if (!confirm('Excluir este atendimento?')) return;
+      try {
+        const { doc, deleteDoc } = window._fb;
+        await deleteDoc(doc(window._db, 'appointments', b.dataset.del));
+        toast('Atendimento excluído');
+      } catch (err) {
+        toast('Erro ao excluir: ' + err.message, true);
+      }
+    });
+  });
+};
+
+/* ===================== CLIENTS ===================== */
+const renderClients = () => {
+  let clients = computeClients();
+
+  if (state.filterClients === 'recurring') clients = clients.filter(c => c.visits > 1);
+  if (state.filterClients === 'vip') clients = clients.filter(c => c.visits >= 5);
+  if (state.filterClients === 'new') clients = clients.filter(c => c.visits === 1);
+
+  const q = norm(state.searchClient);
+  if (q) clients = clients.filter(c => norm(c.name).includes(q));
+
+  const el = document.getElementById('clientRows');
+  if (clients.length === 0) {
+    el.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="icon">∅</div>Nenhum cliente encontrado</div></td></tr>`;
+    return;
+  }
+  el.innerHTML = clients.map(c => {
+    let badge = '<span class="badge new">Novo</span>';
+    if (c.visits >= 5) badge = '<span class="badge vip">VIP</span>';
+    else if (c.visits > 1) badge = '<span class="badge recurring">Recorrente</span>';
+    const avg = c.visits > 0 ? c.total / c.visits : 0;
+    return `
+      <tr>
+        <td><strong>${c.name}</strong></td>
+        <td style="color: var(--text-secondary); font-size: 13px;">${c.phone}</td>
+        <td><strong style="font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--gold-deep);">${c.visits}</strong></td>
+        <td>${badge}</td>
+        <td>${fmtDate(c.lastDate)}</td>
+        <td>R$ ${BRL(avg)}</td>
+        <td><span class="price-tag">R$ ${BRL(c.total)}</span></td>
+      </tr>
+    `;
+  }).join('');
+
+  // Update datalist for new appointment form
+  const dl = document.getElementById('clientsList');
+  dl.innerHTML = computeClients().map(c => `<option value="${c.name}">`).join('');
+};
+
+/* ===================== COMMISSIONS ===================== */
+const renderCommissions = () => {
+  const byMonth = {};
+  state.appointments.forEach(a => {
+    const mk = monthKey(a.date);
+    if (!byMonth[mk]) byMonth[mk] = { count: 0, revenue: 0, commission: 0 };
+    byMonth[mk].count += 1;
+    byMonth[mk].revenue += a.total || 0;
+    byMonth[mk].commission += a.total || 0;
+  });
+
+  const now = new Date();
+  const cur = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const prevDt = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const prev = `${prevDt.getFullYear()}-${String(prevDt.getMonth()+1).padStart(2,'0')}`;
+
+  document.getElementById('commCurrent').textContent = BRL(byMonth[cur]?.commission || 0);
+  document.getElementById('commCurrentCount').textContent = byMonth[cur]?.count || 0;
+  document.getElementById('commPrev').textContent = BRL(byMonth[prev]?.commission || 0);
+  document.getElementById('commTotal').textContent = BRL(Object.values(byMonth).reduce((a, b) => a + b.commission, 0));
+
+  const rows = Object.entries(byMonth).sort((a, b) => b[0].localeCompare(a[0]));
+  const el = document.getElementById('commRows');
+  if (rows.length === 0) {
+    el.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="icon">∅</div>Sem dados</div></td></tr>`;
+    return;
+  }
+  el.innerHTML = rows.map(([m, d]) => `
+    <tr>
+      <td style="text-transform: capitalize;"><strong>${monthName(m)}</strong></td>
+      <td>${d.count}</td>
+      <td>R$ ${BRL(d.revenue)}</td>
+      <td><span class="price-tag">R$ ${BRL(d.commission)}</span></td>
+      <td>${d.revenue > 0 ? Math.round((d.commission / d.revenue) * 100) : 0}%</td>
+    </tr>
+  `).join('');
+};
+
+/* ===================== SERVICES TABLE ===================== */
+const renderServicesTable = () => {
+  const el = document.getElementById('servicesRows');
+  const grouped = {};
+  SERVICES.forEach(s => {
+    if (!grouped[s.category]) grouped[s.category] = [];
+    grouped[s.category].push(s);
+  });
+  el.innerHTML = SERVICES.map(s => `
+    <tr>
+      <td><strong>${s.name}</strong></td>
+      <td><span style="font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-deep);">${s.category}</span></td>
+      <td><span class="price-tag">R$ ${BRL(s.commission)}</span></td>
+    </tr>
+  `).join('');
+};
+
+/* ===================== ALL RENDERS ===================== */
+const renderAll = () => {
+  renderDashboard();
+  renderHistory();
+  renderClients();
+  renderCommissions();
+};
+
+/* ===================== FILTERS ===================== */
+document.querySelectorAll('[data-filter]').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('[data-filter]').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    state.filterHistory = b.dataset.filter;
+    renderHistory();
+  });
+});
+
+document.querySelectorAll('[data-cfilter]').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('[data-cfilter]').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    state.filterClients = b.dataset.cfilter;
+    renderClients();
+  });
+});
+
+document.getElementById('searchHist').addEventListener('input', e => {
+  state.searchHist = e.target.value;
+  renderHistory();
+});
+document.getElementById('searchClient').addEventListener('input', e => {
+  state.searchClient = e.target.value;
+  renderClients();
+});
+
+/* ===================== FIREBASE INIT ===================== */
+window.addEventListener('firebase-ready', () => {
+  const { collection, query, orderBy, onSnapshot } = window._fb;
+  const q = query(collection(window._db, 'appointments'), orderBy('date', 'desc'));
+
+  state.unsub = onSnapshot(q, (snap) => {
+    state.appointments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderAll();
+    setTimeout(() => document.getElementById('splash').classList.add('hide'), 300);
+  }, (err) => {
+    console.error('Firestore error:', err);
+    toast('Erro de conexão com Firebase. Verifique as regras de segurança.', true);
+    setTimeout(() => document.getElementById('splash').classList.add('hide'), 300);
+  });
+});
+
+/* ===================== INITIAL RENDER ===================== */
+renderServicePicker();
+renderSummary();
+renderServicesTable();
+
+// Safety fallback if firebase takes too long
+setTimeout(() => document.getElementById('splash').classList.add('hide'), 3500);
+</script>
+
+</body>
+</html>
