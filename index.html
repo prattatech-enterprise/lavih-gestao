@@ -650,6 +650,63 @@
   .toast.show { transform: translateY(0); opacity: 1; }
   .toast.error { border-left-color: #C04545; color: #F2D0CC; }
 
+  /* ============ MODAL ============ */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(26,22,18,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 500;
+    animation: fadeIn .25s ease;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--gold);
+    border-radius: 4px;
+    padding: 32px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 92vh;
+    overflow-y: auto;
+    box-shadow: 0 30px 80px -20px rgba(26,22,18,0.5);
+    animation: modalIn .35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+  .modal-actions .btn { width: auto; }
+
+  /* Badge para origem do serviço */
+  .badge.default-svc {
+    background: rgba(155, 144, 133, 0.18);
+    color: var(--text-secondary);
+  }
+  .badge.custom-svc {
+    background: rgba(184, 147, 90, 0.18);
+    color: var(--gold-deep);
+  }
+
   /* ============ VIEW SWITCH ============ */
   .view { display: none; animation: fadeIn .4s ease; }
   .view.active { display: block; }
@@ -670,7 +727,59 @@
     border-radius: 4px;
     padding: 28px;
   }
-  .bar-list { display: flex; flex-direction: column; gap: 14px; margin-top: 20px; }
+  .bar-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 20px;
+    max-height: 340px;
+    overflow-y: auto;
+    padding-right: 8px;
+    /* Scrollbar customizada (Webkit) */
+    scrollbar-width: thin;
+    scrollbar-color: var(--gold-soft) transparent;
+  }
+  .bar-list::-webkit-scrollbar { width: 6px; }
+  .bar-list::-webkit-scrollbar-track { background: var(--bg-warm); border-radius: 3px; }
+  .bar-list::-webkit-scrollbar-thumb {
+    background: var(--gold-soft);
+    border-radius: 3px;
+    transition: background .2s ease;
+  }
+  .bar-list::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+  /* Contador no header do card */
+  .services-count {
+    text-align: right;
+    line-height: 1;
+  }
+  .services-count #servicesCountNum {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--gold-deep);
+  }
+  .services-count-label {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  /* Fade visual sutil indicando que há mais conteúdo abaixo */
+  .bar-list-wrap { position: relative; }
+  .bar-list-wrap::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 8px; bottom: 0;
+    height: 24px;
+    background: linear-gradient(180deg, transparent, var(--bg-card));
+    pointer-events: none;
+    border-radius: 0 0 4px 4px;
+    opacity: 0;
+    transition: opacity .2s ease;
+  }
+  .bar-list-wrap.has-overflow::after { opacity: 1; }
   .bar-item .bar-head {
     display: flex; justify-content: space-between;
     font-size: 13px;
@@ -1074,6 +1183,22 @@
       text-align: center;
     }
 
+    /* Modal mobile */
+    .modal-overlay { padding: 0; align-items: flex-end; }
+    .modal-card {
+      max-width: 100%;
+      max-height: 92vh;
+      border-radius: 16px 16px 0 0;
+      padding: 24px 18px;
+      border-top: 3px solid var(--gold);
+    }
+    .modal-actions { flex-direction: column-reverse; gap: 10px; }
+    .modal-actions .btn { width: 100%; }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(80px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     /* Bar list */
     .bar-item .bar-head { font-size: 12px; }
     .bar-item .bar-head .val { font-size: 14px; }
@@ -1215,11 +1340,17 @@
               <div class="section-sub">Top serviços</div>
               <div class="section-title">Mais <em>realizados</em></div>
             </div>
+            <div class="services-count" id="servicesCount" style="display: none;">
+              <span id="servicesCountNum">0</span>
+              <span class="services-count-label">serviços</span>
+            </div>
           </div>
-          <div class="bar-list" id="topServices">
-            <div class="empty-state" style="padding: 30px;">
-              <div class="icon">∅</div>
-              Sem dados ainda
+          <div class="bar-list-wrap" id="topServicesWrap">
+            <div class="bar-list" id="topServices">
+              <div class="empty-state" style="padding: 30px;">
+                <div class="icon">∅</div>
+                Sem dados ainda
+              </div>
             </div>
           </div>
         </div>
@@ -1489,15 +1620,27 @@
           <h1 class="page-title">Tabela de <em>serviços</em></h1>
           <p class="page-sub">Catálogo completo com valores de repasse</p>
         </div>
+        <button class="btn btn-primary" id="btnNewService">+ Novo serviço</button>
       </div>
 
       <div class="section">
+        <div class="filters">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchService" placeholder="Buscar serviço ou categoria...">
+          </div>
+          <button class="filter-chip active" data-sfilter="all">Todos</button>
+          <button class="filter-chip" data-sfilter="custom">Personalizados</button>
+          <button class="filter-chip" data-sfilter="default">Padrão Lavih</button>
+        </div>
         <table class="table">
           <thead>
             <tr>
               <th>Serviço</th>
               <th>Categoria</th>
               <th>Valor de repasse</th>
+              <th>Origem</th>
+              <th></th>
             </tr>
           </thead>
           <tbody id="servicesRows"></tbody>
@@ -1506,6 +1649,56 @@
     </section>
 
   </main>
+</div>
+
+<!-- ============ MODAL: NOVO/EDITAR SERVIÇO ============ -->
+<div class="modal-overlay" id="serviceModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <div class="section-sub" id="serviceModalSub">Cadastro</div>
+        <div class="section-title"><em id="serviceModalTitle">Novo serviço</em></div>
+      </div>
+      <button class="btn-icon" onclick="closeServiceModal()" aria-label="Fechar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <form id="formService">
+      <div class="form-grid" style="grid-template-columns: 1fr;">
+        <div class="form-field">
+          <label class="form-label">Nome do serviço</label>
+          <input type="text" class="form-input" id="sName" placeholder="Ex: Massagem Drenante Premium" required>
+        </div>
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-field">
+            <label class="form-label">Categoria</label>
+            <input type="text" class="form-input" id="sCategory" list="categoriesList" placeholder="Ex: Massagem" required>
+            <datalist id="categoriesList"></datalist>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Valor de repasse (R$)</label>
+            <input type="number" class="form-input" id="sCommission" placeholder="0,00" step="0.01" min="0" required>
+          </div>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Descrição (opcional)</label>
+          <textarea class="form-textarea" id="sDescription" placeholder="Detalhes do serviço, duração, indicações..."></textarea>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Duração estimada em minutos (opcional)</label>
+          <input type="number" class="form-input" id="sDuration" placeholder="Ex: 60" min="0">
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeServiceModal()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btnServiceSave">
+          <span id="btnServiceSaveText">Salvar serviço</span>
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1536,57 +1729,71 @@ window.dispatchEvent(new Event('firebase-ready'));
 
 <script>
 /* ===================== SERVICES CATALOG ===================== */
-const SERVICES = [
+// Catálogo padrão do Lavih — não editável, sempre disponível
+const DEFAULT_SERVICES = [
   // Página 1
-  { id: "s01", name: "Hair Spa Harmonia Capilar", commission: 30, category: "Head Spa" },
-  { id: "s02", name: "Hair Spa Harmonia Total 120 min", commission: 60, category: "Head Spa" },
-  { id: "s03", name: "Hair Spa Harmonia Total 100 min", commission: 50, category: "Head Spa" },
-  { id: "s04", name: "Drenagem Linfática Sensorial", commission: 30, category: "Drenagem" },
-  { id: "s05", name: "Ritual das Pedras Quentes", commission: 30, category: "Massagem" },
-  { id: "s06", name: "Limpeza de Pele Relax", commission: 40, category: "Estética Facial" },
-  { id: "s07", name: "Limpeza de Pele Relaxante Supreme", commission: 50, category: "Estética Facial" },
-  { id: "s08", name: "Massagem Restaurativa com Ventosa", commission: 30, category: "Massagem" },
-  { id: "s09", name: "Spa dos Pés Revitalizante", commission: 30, category: "Pés & Mãos" },
-  { id: "s10", name: "Purificação dos Pés", commission: 5, category: "Pés & Mãos" },
-  { id: "s11", name: "Esfoliação das Mãos", commission: 5, category: "Pés & Mãos" },
-  { id: "s12", name: "Hidratação Labial com Colágeno", commission: 5, category: "Estética Facial" },
-  { id: "s13", name: "Drenagem Facial Glow", commission: 15, category: "Estética Facial" },
-  { id: "s14", name: "Adicional Ritual Pele de Ouro", commission: 10, category: "Adicional" },
-  { id: "s15", name: "Ozonioterapia", commission: 5, category: "Tratamento" },
-  { id: "s16", name: "Terapia Men Regeneração", commission: 30, category: "Masculino" },
-  { id: "s17", name: "Gestação Tranquila", commission: 40, category: "Gestante" },
-  { id: "s18", name: "Renovação Pós-Parto", commission: 30, category: "Gestante" },
-  { id: "s19", name: "Desobstrução Couro Cabeludo", commission: 35, category: "Head Spa" },
+  { id: "s01", name: "Hair Spa Harmonia Capilar", commission: 30, category: "Head Spa", isDefault: true },
+  { id: "s02", name: "Hair Spa Harmonia Total 120 min", commission: 60, category: "Head Spa", isDefault: true },
+  { id: "s03", name: "Hair Spa Harmonia Total 100 min", commission: 50, category: "Head Spa", isDefault: true },
+  { id: "s04", name: "Drenagem Linfática Sensorial", commission: 30, category: "Drenagem", isDefault: true },
+  { id: "s05", name: "Ritual das Pedras Quentes", commission: 30, category: "Massagem", isDefault: true },
+  { id: "s06", name: "Limpeza de Pele Relax", commission: 40, category: "Estética Facial", isDefault: true },
+  { id: "s07", name: "Limpeza de Pele Relaxante Supreme", commission: 50, category: "Estética Facial", isDefault: true },
+  { id: "s08", name: "Massagem Restaurativa com Ventosa", commission: 30, category: "Massagem", isDefault: true },
+  { id: "s09", name: "Spa dos Pés Revitalizante", commission: 30, category: "Pés & Mãos", isDefault: true },
+  { id: "s10", name: "Purificação dos Pés", commission: 5, category: "Pés & Mãos", isDefault: true },
+  { id: "s11", name: "Esfoliação das Mãos", commission: 5, category: "Pés & Mãos", isDefault: true },
+  { id: "s12", name: "Hidratação Labial com Colágeno", commission: 5, category: "Estética Facial", isDefault: true },
+  { id: "s13", name: "Drenagem Facial Glow", commission: 15, category: "Estética Facial", isDefault: true },
+  { id: "s14", name: "Adicional Ritual Pele de Ouro", commission: 10, category: "Adicional", isDefault: true },
+  { id: "s15", name: "Ozonioterapia", commission: 5, category: "Tratamento", isDefault: true },
+  { id: "s16", name: "Terapia Men Regeneração", commission: 30, category: "Masculino", isDefault: true },
+  { id: "s17", name: "Gestação Tranquila", commission: 40, category: "Gestante", isDefault: true },
+  { id: "s18", name: "Renovação Pós-Parto", commission: 30, category: "Gestante", isDefault: true },
+  { id: "s19", name: "Desobstrução Couro Cabeludo", commission: 35, category: "Head Spa", isDefault: true },
   // Página 2
-  { id: "s20", name: "Detox Capilar", commission: 35, category: "Head Spa" },
-  { id: "s21", name: "Detox Capilar com Argila Branca", commission: 30, category: "Head Spa" },
-  { id: "s22", name: "Estímulo Vitamina A", commission: 35, category: "Head Spa" },
-  { id: "s23", name: "Estímulo Vitamina E", commission: 35, category: "Head Spa" },
-  { id: "s24", name: "Estímulo Vitamina B5", commission: 35, category: "Head Spa" },
-  { id: "s25", name: "Ritual das Pedras Quentes Supreme", commission: 30, category: "Massagem" },
-  { id: "s26", name: "Massagem Express", commission: 15, category: "Massagem" },
-  { id: "s27", name: "Massagem Desportiva", commission: 30, category: "Massagem" },
-  { id: "s28", name: "Spa Kids", commission: 30, category: "Especial" },
-  { id: "s29", name: "Adicional Massagem Restaurativa com Ventosa (25min)", commission: 15, category: "Adicional" },
-  { id: "s30", name: "Minutos Adicionais (20 min extra)", commission: 10, category: "Adicional" },
-  { id: "s31", name: "Mini Day Spa Detox", commission: 85, category: "Day Spa" },
-  { id: "s32", name: "Mini Day Spa Renovação", commission: 75, category: "Day Spa" },
-  { id: "s33", name: "Mini Day Spa Pele", commission: 80, category: "Day Spa" },
+  { id: "s20", name: "Detox Capilar", commission: 35, category: "Head Spa", isDefault: true },
+  { id: "s21", name: "Detox Capilar com Argila Branca", commission: 30, category: "Head Spa", isDefault: true },
+  { id: "s22", name: "Estímulo Vitamina A", commission: 35, category: "Head Spa", isDefault: true },
+  { id: "s23", name: "Estímulo Vitamina E", commission: 35, category: "Head Spa", isDefault: true },
+  { id: "s24", name: "Estímulo Vitamina B5", commission: 35, category: "Head Spa", isDefault: true },
+  { id: "s25", name: "Ritual das Pedras Quentes Supreme", commission: 30, category: "Massagem", isDefault: true },
+  { id: "s26", name: "Massagem Express", commission: 15, category: "Massagem", isDefault: true },
+  { id: "s27", name: "Massagem Desportiva", commission: 30, category: "Massagem", isDefault: true },
+  { id: "s28", name: "Spa Kids", commission: 30, category: "Especial", isDefault: true },
+  { id: "s29", name: "Adicional Massagem Restaurativa com Ventosa (25min)", commission: 15, category: "Adicional", isDefault: true },
+  { id: "s30", name: "Minutos Adicionais (20 min extra)", commission: 10, category: "Adicional", isDefault: true },
+  { id: "s31", name: "Mini Day Spa Detox", commission: 85, category: "Day Spa", isDefault: true },
+  { id: "s32", name: "Mini Day Spa Renovação", commission: 75, category: "Day Spa", isDefault: true },
+  { id: "s33", name: "Mini Day Spa Pele", commission: 80, category: "Day Spa", isDefault: true },
 ];
+
+// Função que combina serviços padrão + customizados do Firestore
+const getAllServices = () => [...DEFAULT_SERVICES, ...state.customServices];
+
+// Mantemos um proxy `SERVICES` que sempre retorna a lista combinada — para retrocompatibilidade
+// com o restante do código que usa SERVICES diretamente
+let SERVICES = [...DEFAULT_SERVICES];
+const refreshServicesList = () => { SERVICES = getAllServices(); };
 
 /* ===================== STATE ===================== */
 const state = {
   appointments: [],
+  customServices: [],
   selectedServices: new Set(),
   filterHistory: 'all',
   filterClients: 'all',
+  filterServices: 'all',
   searchHist: '',
   searchClient: '',
+  searchService: '',
   editingId: null,
+  editingServiceId: null,
   period: 'day',
   customFrom: null,
   customTo: null,
   unsub: null,
+  unsubServices: null,
 };
 
 const BRL = v => new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v || 0);
@@ -1907,12 +2114,19 @@ const renderDashboard = () => {
       svcCount[s.name] = (svcCount[s.name] || 0) + 1;
     });
   });
-  const sorted = Object.entries(svcCount).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const sorted = Object.entries(svcCount).sort((a, b) => b[1] - a[1]);
   const max = sorted[0]?.[1] || 1;
   const topEl = document.getElementById('topServices');
+  const topWrap = document.getElementById('topServicesWrap');
+  const countEl = document.getElementById('servicesCount');
+  const countNumEl = document.getElementById('servicesCountNum');
   if (sorted.length === 0) {
     topEl.innerHTML = `<div class="empty-state" style="padding: 30px;"><div class="icon">∅</div>Sem dados no período</div>`;
+    topWrap.classList.remove('has-overflow');
+    countEl.style.display = 'none';
   } else {
+    countNumEl.textContent = sorted.length;
+    countEl.style.display = 'block';
     topEl.innerHTML = sorted.map(([n, c]) => `
       <div class="bar-item">
         <div class="bar-head"><span class="name">${n}</span><span class="val">${c}</span></div>
@@ -1921,7 +2135,18 @@ const renderDashboard = () => {
     `).join('');
     setTimeout(() => {
       topEl.querySelectorAll('.bar-fill').forEach(b => b.style.width = b.dataset.width + '%');
+      // Detectar se há overflow para mostrar fade visual
+      if (topEl.scrollHeight > topEl.clientHeight + 4) {
+        topWrap.classList.add('has-overflow');
+      } else {
+        topWrap.classList.remove('has-overflow');
+      }
     }, 50);
+    // Esconder o fade quando o usuário rolar até o final
+    topEl.onscroll = () => {
+      const atBottom = topEl.scrollTop + topEl.clientHeight >= topEl.scrollHeight - 4;
+      topWrap.classList.toggle('has-overflow', !atBottom && topEl.scrollHeight > topEl.clientHeight + 4);
+    };
   }
 
   // Recent — always show last 5 globally (not filtered)
@@ -2118,20 +2343,155 @@ const renderCommissions = () => {
 
 /* ===================== SERVICES TABLE ===================== */
 const renderServicesTable = () => {
+  refreshServicesList();
   const el = document.getElementById('servicesRows');
-  const grouped = {};
-  SERVICES.forEach(s => {
-    if (!grouped[s.category]) grouped[s.category] = [];
-    grouped[s.category].push(s);
+
+  let list = [...SERVICES];
+
+  // Filtros
+  if (state.filterServices === 'custom') list = list.filter(s => !s.isDefault);
+  if (state.filterServices === 'default') list = list.filter(s => s.isDefault);
+
+  // Busca
+  const q = norm(state.searchService);
+  if (q) list = list.filter(s => norm(s.name).includes(q) || norm(s.category).includes(q));
+
+  if (list.length === 0) {
+    el.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="icon">∅</div>Nenhum serviço encontrado</div></td></tr>`;
+  } else {
+    el.innerHTML = list.map(s => {
+      const originBadge = s.isDefault
+        ? '<span class="badge default-svc">Padrão</span>'
+        : '<span class="badge custom-svc">Personalizado</span>';
+      const actions = s.isDefault
+        ? '<span style="color: var(--text-muted); font-size: 11px;">—</span>'
+        : `
+          <button class="btn-icon" data-edit-service="${s.id}" title="Editar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn-icon danger" data-del-service="${s.id}" title="Excluir">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+          </button>
+        `;
+      return `
+        <tr>
+          <td data-label="Serviço"><strong>${s.name}</strong>${s.description ? `<div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">${s.description}</div>` : ''}${s.duration ? `<div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">${s.duration} min</div>` : ''}</td>
+          <td data-label="Categoria"><span style="font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-deep);">${s.category}</span></td>
+          <td data-label="Repasse"><span class="price-tag">R$ ${BRL(s.commission)}</span></td>
+          <td data-label="Origem">${originBadge}</td>
+          <td class="actions" style="white-space: nowrap;">${actions}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // Bind action handlers
+  el.querySelectorAll('[data-edit-service]').forEach(b => {
+    b.addEventListener('click', () => openServiceModal(b.dataset.editService));
   });
-  el.innerHTML = SERVICES.map(s => `
-    <tr>
-      <td data-label="Serviço"><strong>${s.name}</strong></td>
-      <td data-label="Categoria"><span style="font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-deep);">${s.category}</span></td>
-      <td data-label="Repasse"><span class="price-tag">R$ ${BRL(s.commission)}</span></td>
-    </tr>
-  `).join('');
+  el.querySelectorAll('[data-del-service]').forEach(b => {
+    b.addEventListener('click', async () => {
+      const svc = state.customServices.find(s => s.id === b.dataset.delService);
+      if (!svc) return;
+      if (!confirm(`Excluir o serviço "${svc.name}"?\n\nAtendimentos antigos que usaram este serviço NÃO serão afetados.`)) return;
+      try {
+        const { doc, deleteDoc } = window._fb;
+        await deleteDoc(doc(window._db, 'services', svc.id));
+        toast('Serviço excluído');
+      } catch (err) {
+        toast('Erro ao excluir: ' + err.message, true);
+      }
+    });
+  });
+
+  // Atualizar datalist de categorias com todas as categorias únicas
+  const cats = [...new Set(SERVICES.map(s => s.category))].sort();
+  const dl = document.getElementById('categoriesList');
+  if (dl) dl.innerHTML = cats.map(c => `<option value="${c}">`).join('');
 };
+
+/* ===================== SERVICE MODAL ===================== */
+const openServiceModal = (editId = null) => {
+  state.editingServiceId = editId;
+  const form = document.getElementById('formService');
+  form.reset();
+
+  if (editId) {
+    const s = state.customServices.find(x => x.id === editId);
+    if (!s) { toast('Serviço não encontrado', true); return; }
+    document.getElementById('sName').value = s.name || '';
+    document.getElementById('sCategory').value = s.category || '';
+    document.getElementById('sCommission').value = s.commission || '';
+    document.getElementById('sDescription').value = s.description || '';
+    document.getElementById('sDuration').value = s.duration || '';
+    document.getElementById('serviceModalTitle').textContent = 'Editar serviço';
+    document.getElementById('serviceModalSub').textContent = 'Atualização';
+    document.getElementById('btnServiceSaveText').textContent = 'Salvar alterações';
+  } else {
+    document.getElementById('serviceModalTitle').textContent = 'Novo serviço';
+    document.getElementById('serviceModalSub').textContent = 'Cadastro';
+    document.getElementById('btnServiceSaveText').textContent = 'Salvar serviço';
+  }
+  document.getElementById('serviceModal').classList.add('open');
+};
+
+const closeServiceModal = () => {
+  document.getElementById('serviceModal').classList.remove('open');
+  state.editingServiceId = null;
+};
+window.closeServiceModal = closeServiceModal;
+
+// Submit do formulário de serviço
+document.getElementById('formService').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('sName').value.trim();
+  const category = document.getElementById('sCategory').value.trim();
+  const commission = parseFloat(document.getElementById('sCommission').value);
+  const description = document.getElementById('sDescription').value.trim();
+  const duration = parseInt(document.getElementById('sDuration').value) || null;
+
+  if (!name || !category || isNaN(commission) || commission < 0) {
+    toast('Preencha nome, categoria e valor de repasse válido', true);
+    return;
+  }
+
+  const btn = document.getElementById('btnServiceSave');
+  const btnTxt = document.getElementById('btnServiceSaveText');
+  const originalText = btnTxt.textContent;
+  btn.disabled = true;
+  btnTxt.innerHTML = '<span class="loader"></span>';
+
+  try {
+    const { collection, addDoc, doc, updateDoc, serverTimestamp } = window._fb;
+    const payload = { name, category, commission, description, duration };
+
+    if (state.editingServiceId) {
+      payload.updatedAt = serverTimestamp();
+      await updateDoc(doc(window._db, 'services', state.editingServiceId), payload);
+      toast('Serviço atualizado');
+    } else {
+      payload.createdAt = serverTimestamp();
+      payload.isDefault = false;
+      await addDoc(collection(window._db, 'services'), payload);
+      toast('Serviço cadastrado');
+    }
+    closeServiceModal();
+  } catch (err) {
+    console.error(err);
+    toast('Erro ao salvar: ' + err.message, true);
+  } finally {
+    btn.disabled = false;
+    btnTxt.textContent = originalText;
+  }
+});
+
+// Botão "Novo serviço"
+document.getElementById('btnNewService').addEventListener('click', () => openServiceModal());
+
+// Fechar modal ao clicar no overlay (fora do card)
+document.getElementById('serviceModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('serviceModal')) closeServiceModal();
+});
 
 /* ===================== ALL RENDERS ===================== */
 const renderAll = () => {
@@ -2196,6 +2556,15 @@ document.querySelectorAll('[data-cfilter]').forEach(b => {
   });
 });
 
+document.querySelectorAll('[data-sfilter]').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('[data-sfilter]').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    state.filterServices = b.dataset.sfilter;
+    renderServicesTable();
+  });
+});
+
 document.getElementById('searchHist').addEventListener('input', e => {
   state.searchHist = e.target.value;
   renderHistory();
@@ -2203,6 +2572,10 @@ document.getElementById('searchHist').addEventListener('input', e => {
 document.getElementById('searchClient').addEventListener('input', e => {
   state.searchClient = e.target.value;
   renderClients();
+});
+document.getElementById('searchService').addEventListener('input', e => {
+  state.searchService = e.target.value;
+  renderServicesTable();
 });
 
 /* ===================== FIREBASE INIT ===================== */
@@ -2218,6 +2591,19 @@ window.addEventListener('firebase-ready', () => {
     console.error('Firestore error:', err);
     toast('Erro de conexão com Firebase. Verifique as regras de segurança.', true);
     setTimeout(() => document.getElementById('splash').classList.add('hide'), 300);
+  });
+
+  // Listener para serviços personalizados
+  const qSvc = collection(window._db, 'services');
+  state.unsubServices = onSnapshot(qSvc, (snap) => {
+    state.customServices = snap.docs.map(d => ({ id: d.id, ...d.data(), isDefault: false }));
+    refreshServicesList();
+    // Re-render telas que dependem de SERVICES
+    renderServicesTable();
+    renderServicePicker();
+    renderSummary();
+  }, (err) => {
+    console.error('Firestore services error:', err);
   });
 });
 
