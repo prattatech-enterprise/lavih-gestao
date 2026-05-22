@@ -137,6 +137,9 @@
     max-width: calc(100vw - 260px);
   }
 
+  .menu-toggle { display: none; }
+  .sidebar-backdrop { display: none; }
+
   .page-head {
     display: flex; justify-content: space-between; align-items: flex-end;
     margin-bottom: 40px;
@@ -858,6 +861,10 @@
       gap: 12px;
       padding: 12px;
       margin-bottom: 20px;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
     }
     .period-chips {
       overflow-x: auto;
@@ -865,6 +872,7 @@
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
       padding: 4px;
+      max-width: 100%;
     }
     .period-chips::-webkit-scrollbar { display: none; }
     .period-chip {
@@ -875,10 +883,25 @@
     }
     .period-range {
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       align-items: stretch;
+      width: 100%;
     }
-    .range-field { min-width: 0; }
+    .range-field {
+      min-width: 0;
+      width: 100%;
+    }
+    .range-field .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: var(--bg-cream);
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    /* Botão Aplicar no filtro de data ocupa largura inteira */
+    #applyRange { width: 100%; }
 
     /* Section padding */
     .section { padding: 20px 16px; }
@@ -1066,8 +1089,6 @@
     .kpi-value { font-size: 28px; }
     .main { padding: 66px 12px 60px; }
   }
-
-  .menu-toggle { display: none; }
 </style>
 </head>
 <body>
